@@ -25,3 +25,13 @@ const userRoutes = require('./routes/userRoutes');
 
 // ... existing code (after app.use(express.json()))
 app.use('/api/users', userRoutes);
+
+const { protect } = require('./middleware/authMiddleware');
+
+// Protected test route
+app.get('/api/protected', protect, (req, res) => {
+    res.json({ 
+        message: 'Yeh protected route hai!',
+        user: req.user.name 
+    });
+});
