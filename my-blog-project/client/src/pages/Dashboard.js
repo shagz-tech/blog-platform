@@ -8,24 +8,42 @@ const Dashboard = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Dummy stats — baad mein backend se aayenge
   const stats = [
-    { label: 'Total Views', value: '2,847', delta: '+12% this week', color: '#E6F1FB', textColor: '#0C447C' },
-    { label: 'Followers', value: '142', delta: '+8 naye', color: '#E1F5EE', textColor: '#085041' },
-    { label: 'Posts', value: posts.length, delta: '', color: '#EEEDFE', textColor: '#3C3489' },
-    { label: 'Comments', value: '94', delta: '6 pending', color: '#FAEEDA', textColor: '#633806' },
+    { label: 'Total Views', value: '2,847', delta: '+12% this week', bg: '#E6F1FB', color: '#0C447C' },
+    { label: 'Followers', value: '142', delta: '+8 naye', bg: '#E1F5EE', color: '#085041' },
+    { label: 'Posts', value: posts.length, delta: '', bg: '#EEEDFE', color: '#3C3489' },
+    { label: 'Comments', value: '94', delta: '6 pending', bg: '#FAEEDA', color: '#633806' },
   ];
 
   useEffect(() => {
-    // Baad mein backend se posts fetch honge
-    setLoading(false);
-    setPosts([
-      { _id: '1', title: 'AI se apni writing kaise behtar karein', status: 'published', views: 1204, createdAt: '2026-04-12' },
-      { _id: '2', title: 'Minimalism kyun zaroori hai', status: 'published', views: 839, createdAt: '2026-04-08' },
-      { _id: '3', title: 'Subah ki sahi routine', status: 'published', views: 604, createdAt: '2026-04-02' },
-      { _id: '4', title: 'Travel karte waqt productive kaise rahein', status: 'draft', views: 0, createdAt: '2026-04-19' },
-    ]);
-  }, []);
+    const fetchMyPosts = async () => {
+      if (!user) return;
+      try {
+        const { data } = await axios.get(
+          'http://localhost:5000/api/posts/user/myposts',
+          { headers: { Authorization: `Bearer ${user.token}` } }
+        );
+        setPosts(data);
+      } catch (error) {
+        console.error('Posts fetch nahi huyi:', error);
+      }
+      setLoading(false);
+    };
+    fetchMyPosts();
+  }, [user]);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Kya aap sach mein yeh post delete karna chahte hain?')) return;
+    try {
+      await axios.delete(
+        `http://localhost:5000/api/posts/${id}`,
+        { headers: { Authorization: `Bearer ${user.token}` } }
+      );
+      setPosts(posts.filter((p) => p._id !== id));
+    } catch (error) {
+      console.error('Delete nahi hua:', error);
+    }
+  };
 
   if (!user) {
     return (
@@ -54,13 +72,13 @@ const Dashboard = () => {
         </Link>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
         {stats.map((stat) => (
-          <div key={stat.label} style={{ background: stat.color, borderRadius: '12px', padding: '1.25rem' }}>
-            <div style={{ fontSize: '24px', fontWeight: '600', color: stat.textColor }}>{stat.value}</div>
-            <div style={{ fontSize: '12px', color: stat.textColor, marginTop: '4px', opacity: 0.8 }}>{stat.label}</div>
-            {stat.delta && <div style={{ fontSize: '11px', color: stat.textColor, marginTop: '4px', fontWeight: '500' }}>{stat.delta}</div>}
+          <div key={stat.label} style={{ background: stat.bg, borderRadius: '12px', padding: '1.25rem' }}>
+            <div style={{ fontSize: '24px', fontWeight: '600', color: stat.color }}>{stat.value}</div>
+            <div style={{ fontSize: '12px', color: stat.color, marginTop: '4px', opacity: 0.8 }}>{stat.label}</div>
+            {stat.delta && <div style={{ fontSize: '11px', color: stat.color, marginTop: '4px', fontWeight: '500' }}>{stat.delta}</div>}
           </div>
         ))}
       </div>
@@ -76,9 +94,11 @@ const Dashboard = () => {
           <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#888' }}>{posts.length} posts</span>
         </div>
 
-        {/* Posts List */}
+        {/* Posts */}
         {loading ? (
-          <div style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>Loading...</div>
+          <div style={{ padding: '2rem', textAlign: 'center', color: '#888' }}>
+            Loading...
+          </div>
         ) : posts.length === 0 ? (
           <div style={{ padding: '3rem', textAlign: 'center', color: '#888' }}>
             <p style={{ marginBottom: '1rem' }}>Abhi tak koi post nahi likhi!</p>
@@ -88,9 +108,9 @@ const Dashboard = () => {
           posts.map((post, index) => (
             <div
               key={post._id}
-              style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.5rem', borderBottom: index < posts.length - 1 ? '1px solid #eee' : 'none' }}
+              style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.5rem', borderBottom: index < posts.length - 1 ? '1px solid #eee' : 'none', flexWrap: 'wrap' }}
             >
-              {/* Status Badge */}
+              {/* Status */}
               <span style={{
                 fontSize: '10px', fontWeight: '500', padding: '3px 10px', borderRadius: '20px', whiteSpace: 'nowrap',
                 background: post.status === 'published' ? '#EAF3DE' : '#F1EFE8',
@@ -100,9 +120,9 @@ const Dashboard = () => {
               </span>
 
               {/* Title */}
-              <span style={{ fontSize: '14px', fontWeight: '500', color: '#111', flex: 1 }}>
+              <Link to={`/post/${post._id}`} style={{ fontSize: '14px', fontWeight: '500', color: '#111', flex: 1, textDecoration: 'none' }}>
                 {post.title}
-              </span>
+              </Link>
 
               {/* Views */}
               <span style={{ fontSize: '12px', color: '#888', minWidth: '70px', textAlign: 'right' }}>
@@ -116,10 +136,16 @@ const Dashboard = () => {
 
               {/* Actions */}
               <div style={{ display: 'flex', gap: '8px' }}>
-                <button style={{ fontSize: '12px', padding: '4px 12px', border: '1px solid #eee', borderRadius: '20px', background: '#fff', cursor: 'pointer', color: '#555' }}>
+                <Link
+                  to={`/edit/${post._id}`}
+                  style={{ fontSize: '12px', padding: '4px 12px', border: '1px solid #eee', borderRadius: '20px', background: '#fff', cursor: 'pointer', color: '#555', textDecoration: 'none' }}
+                >
                   Edit
-                </button>
-                <button style={{ fontSize: '12px', padding: '4px 12px', border: '1px solid #ffcccc', borderRadius: '20px', background: '#fff0f0', cursor: 'pointer', color: '#cc0000' }}>
+                </Link>
+                <button
+                  onClick={() => handleDelete(post._id)}
+                  style={{ fontSize: '12px', padding: '4px 12px', border: '1px solid #ffcccc', borderRadius: '20px', background: '#fff0f0', cursor: 'pointer', color: '#cc0000' }}
+                >
                   Delete
                 </button>
               </div>
@@ -128,7 +154,7 @@ const Dashboard = () => {
         )}
       </div>
 
-      {/* Logout Button */}
+      {/* Logout */}
       <div style={{ marginTop: '2rem', textAlign: 'center' }}>
         <button
           onClick={logout}

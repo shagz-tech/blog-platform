@@ -77,13 +77,29 @@ const Write = () => {
       )}
 
       {/* Title */}
-      <input
-        type="text"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="Post ka title likhein..."
-        style={{ width: '100%', fontSize: '1.5rem', fontFamily: 'Georgia, serif', fontWeight: '700', border: 'none', borderBottom: '1px solid #eee', padding: '0.75rem 0', outline: 'none', marginBottom: '1rem', color: '#111' }}
-      />
+     <input
+  type="text"
+  value={title}
+  onChange={(e) => setTitle(e.target.value)}
+  placeholder="Post ka title likhein..."
+  style={{ 
+    width: '100%', 
+    fontSize: '1.5rem', 
+    fontFamily: 'Georgia, serif', 
+    fontWeight: '700', 
+    border: 'none', 
+    borderBottom: '1px solid #eee', 
+    padding: '0.75rem 0', 
+    outline: 'none', 
+    marginBottom: '1rem', 
+    color: '#111',
+    background: 'transparent',
+    pointerEvents: 'auto',
+    position: 'relative',
+    zIndex: 10,
+    display: 'block'
+  }}
+/>
 
       {/* Toolbar */}
       <div style={{ display: 'flex', gap: '4px', padding: '8px', background: '#f8f8f8', borderRadius: '8px', marginBottom: '1rem', flexWrap: 'wrap' }}>
